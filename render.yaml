@@ -7,12 +7,3 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: DATABASE_URL
-        fromDatabase:
-          name: recipebook-db
-          property: connectionString
-
-databases:
-  - name: recipebook-db
-    databaseName: recipebook
-    user: recipebook_user

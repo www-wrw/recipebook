@@ -4,7 +4,7 @@ import { getDb } from '../db/init.js';
 const router = express.Router();
 
 // Generate shopping list based on recipes and pantry
-router.post('/generate', async (req, res) => {
+router.post('/generate', (req, res) => {
   try {
     const { recipeIds } = req.body;
     if (!recipeIds || !Array.isArray(recipeIds) || recipeIds.length === 0) {
@@ -14,24 +14,24 @@ router.post('/generate', async (req, res) => {
     const db = getDb();
 
     // Get all ingredients from selected recipes
-    const placeholders = recipeIds.map((_, i) => `$${i + 1}`).join(',');
-    const recipeIngredients = await db.query(`
-      SELECT "ingredientName", SUM(quantity) as "totalQuantity", unit
+    const placeholders = recipeIds.map(() => '?').join(',');
+    const recipeIngredients = db.prepare(`
+      SELECT ingredientName, SUM(quantity) as totalQuantity, unit
       FROM recipe_ingredients
-      WHERE "recipeId" IN (${placeholders})
-      GROUP BY "ingredientName", unit
-    `, recipeIds);
+      WHERE recipeId IN (${placeholders})
+      GROUP BY ingredientName, unit
+    `).all(...recipeIds);
 
     // Get pantry items
-    const pantryResult = await db.query('SELECT name, quantity, unit FROM pantry');
+    const pantryItems = db.prepare('SELECT name, quantity, unit FROM pantry').all();
     const pantryMap = new Map();
-    pantryResult.rows.forEach(item => {
+    pantryItems.forEach(item => {
       const key = `${item.name.toLowerCase()}:${item.unit}`;
       pantryMap.set(key, item.quantity);
     });
 
     // Calculate what's needed
-    const shoppingList = recipeIngredients.rows.filter(ingredient => {
+    const shoppingList = recipeIngredients.filter(ingredient => {
       const key = `${ingredient.ingredientName.toLowerCase()}:${ingredient.unit}`;
       const pantryQty = pantryMap.get(key) || 0;
       return ingredient.totalQuantity > pantryQty;

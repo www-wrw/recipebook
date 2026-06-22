@@ -5,78 +5,78 @@ import { getDb } from '../db/init.js';
 const router = express.Router();
 
 // Get all recipes
-router.get('/', async (req, res) => {
+router.get('/', (req, res) => {
   try {
     const db = getDb();
-    const result = await db.query(`
-      SELECT r.*, f.name as "folderName"
+    const recipes = db.prepare(`
+      SELECT r.*, f.name as folderName
       FROM recipes r
-      LEFT JOIN folders f ON r."folderId" = f.id
-      ORDER BY r."updatedAt" DESC
-    `);
-    res.json(result.rows);
+      LEFT JOIN folders f ON r.folderId = f.id
+      ORDER BY r.updatedAt DESC
+    `).all();
+    res.json(recipes);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
 // Get recipe by ID with ingredients
-router.get('/:id', async (req, res) => {
+router.get('/:id', (req, res) => {
   try {
     const db = getDb();
-    const recipe = await db.query('SELECT * FROM recipes WHERE id = $1', [req.params.id]);
-    if (recipe.rows.length === 0) return res.status(404).json({ error: 'Recipe not found' });
+    const recipe = db.prepare('SELECT * FROM recipes WHERE id = ?').get(req.params.id);
+    if (!recipe) return res.status(404).json({ error: 'Recipe not found' });
 
-    const ingredients = await db.query(
-      'SELECT * FROM recipe_ingredients WHERE "recipeId" = $1',
-      [req.params.id]
-    );
+    const ingredients = db.prepare(
+      'SELECT * FROM recipe_ingredients WHERE recipeId = ?'
+    ).all(req.params.id);
 
-    const dietTags = await db.query(`
+    const dietTags = db.prepare(`
       SELECT dp.* FROM diet_preferences dp
-      JOIN recipe_diet_tags rdt ON dp.id = rdt."dietPreferenceId"
-      WHERE rdt."recipeId" = $1
-    `, [req.params.id]);
+      JOIN recipe_diet_tags rdt ON dp.id = rdt.dietPreferenceId
+      WHERE rdt.recipeId = ?
+    `).all(req.params.id);
 
-    res.json({ ...recipe.rows[0], ingredients: ingredients.rows, dietTags: dietTags.rows });
+    res.json({ ...recipe, ingredients, dietTags });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
 // Create recipe
-router.post('/', async (req, res) => {
+router.post('/', (req, res) => {
   try {
     const { name, description, imageUrl, folderId, servings, ingredients, dietTags } = req.body;
     const db = getDb();
     const recipeId = uuidv4();
 
-    await db.query(
-      `INSERT INTO recipes (id, name, description, "imageUrl", "folderId", servings)
-       VALUES ($1, $2, $3, $4, $5, $6)`,
-      [recipeId, name, description, imageUrl || null, folderId || null, servings || 1]
-    );
+    db.prepare(
+      `INSERT INTO recipes (id, name, description, imageUrl, folderId, servings)
+       VALUES (?, ?, ?, ?, ?, ?)`
+    ).run(recipeId, name, description, imageUrl || null, folderId || null, servings || 1);
 
     // Add ingredients
     if (ingredients && Array.isArray(ingredients)) {
-      const ingStmt = `INSERT INTO recipe_ingredients
-       (id, "recipeId", "ingredientName", quantity, unit, calories, protein, carbs, fat, fiber)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`;
+      const ingStmt = db.prepare(
+        `INSERT INTO recipe_ingredients
+         (id, recipeId, ingredientName, quantity, unit, calories, protein, carbs, fat, fiber)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      );
       for (const ing of ingredients) {
-        await db.query(ingStmt, [
+        ingStmt.run(
           uuidv4(), recipeId, ing.name, ing.quantity, ing.unit,
           ing.calories || null, ing.protein || null, ing.carbs || null, ing.fat || null, ing.fiber || null
-        ]);
+        );
       }
     }
 
     // Add diet tags
     if (dietTags && Array.isArray(dietTags)) {
+      const tagStmt = db.prepare(
+        `INSERT INTO recipe_diet_tags (recipeId, dietPreferenceId) VALUES (?, ?)`
+      );
       for (const dietId of dietTags) {
-        await db.query(
-          `INSERT INTO recipe_diet_tags ("recipeId", "dietPreferenceId") VALUES ($1, $2)`,
-          [recipeId, dietId]
-        );
+        tagStmt.run(recipeId, dietId);
       }
     }
 
@@ -87,40 +87,41 @@ router.post('/', async (req, res) => {
 });
 
 // Update recipe
-router.put('/:id', async (req, res) => {
+router.put('/:id', (req, res) => {
   try {
     const { name, description, imageUrl, folderId, servings, ingredients, dietTags } = req.body;
     const db = getDb();
 
-    await db.query(
+    db.prepare(
       `UPDATE recipes
-       SET name = $1, description = $2, "imageUrl" = $3, "folderId" = $4, servings = $5, "updatedAt" = CURRENT_TIMESTAMP
-       WHERE id = $6`,
-      [name, description, imageUrl || null, folderId || null, servings || 1, req.params.id]
-    );
+       SET name = ?, description = ?, imageUrl = ?, folderId = ?, servings = ?, updatedAt = CURRENT_TIMESTAMP
+       WHERE id = ?`
+    ).run(name, description, imageUrl || null, folderId || null, servings || 1, req.params.id);
 
     // Update ingredients
-    await db.query('DELETE FROM recipe_ingredients WHERE "recipeId" = $1', [req.params.id]);
+    db.prepare('DELETE FROM recipe_ingredients WHERE recipeId = ?').run(req.params.id);
     if (ingredients && Array.isArray(ingredients)) {
-      const ingStmt = `INSERT INTO recipe_ingredients
-       (id, "recipeId", "ingredientName", quantity, unit, calories, protein, carbs, fat, fiber)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`;
+      const ingStmt = db.prepare(
+        `INSERT INTO recipe_ingredients
+         (id, recipeId, ingredientName, quantity, unit, calories, protein, carbs, fat, fiber)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      );
       for (const ing of ingredients) {
-        await db.query(ingStmt, [
+        ingStmt.run(
           uuidv4(), req.params.id, ing.name, ing.quantity, ing.unit,
           ing.calories || null, ing.protein || null, ing.carbs || null, ing.fat || null, ing.fiber || null
-        ]);
+        );
       }
     }
 
     // Update diet tags
-    await db.query('DELETE FROM recipe_diet_tags WHERE "recipeId" = $1', [req.params.id]);
+    db.prepare('DELETE FROM recipe_diet_tags WHERE recipeId = ?').run(req.params.id);
     if (dietTags && Array.isArray(dietTags)) {
+      const tagStmt = db.prepare(
+        `INSERT INTO recipe_diet_tags (recipeId, dietPreferenceId) VALUES (?, ?)`
+      );
       for (const dietId of dietTags) {
-        await db.query(
-          `INSERT INTO recipe_diet_tags ("recipeId", "dietPreferenceId") VALUES ($1, $2)`,
-          [req.params.id, dietId]
-        );
+        tagStmt.run(req.params.id, dietId);
       }
     }
 
@@ -131,10 +132,10 @@ router.put('/:id', async (req, res) => {
 });
 
 // Delete recipe
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', (req, res) => {
   try {
     const db = getDb();
-    await db.query('DELETE FROM recipes WHERE id = $1', [req.params.id]);
+    db.prepare('DELETE FROM recipes WHERE id = ?').run(req.params.id);
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
