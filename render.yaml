@@ -12,11 +12,6 @@ services:
           name: recipebook-db
           property: connectionString
 
-  - type: static
-    name: recipebook-frontend
-    buildCommand: npm install && npm run build -w frontend
-    staticPublishPath: frontend/dist
-
 databases:
   - name: recipebook-db
     databaseName: recipebook
