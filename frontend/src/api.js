@@ -1,9 +1,11 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+// Backend mounts all routes under /api, so the base URL includes it.
+// VITE_API_URL is the backend origin (e.g. https://recipebook-backend-b8ji.onrender.com).
+const ORIGIN = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: `${ORIGIN}/api`,
   headers: {
     'Content-Type': 'application/json'
   }

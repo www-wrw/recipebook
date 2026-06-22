@@ -5,7 +5,9 @@ import { getDb } from '../db/init.js';
 const router = express.Router();
 
 const USDA_API_BASE = 'https://fdc.nal.usda.gov/api/foods/search';
-const USDA_API_KEY = 'DEMO_KEY'; // Using demo key - works with limited queries
+// Set USDA_API_KEY in env for real use; DEMO_KEY is heavily rate-limited (shared
+// globally, ~30 req/hour) and will 429 quickly. Free key: https://fdc.nal.usda.gov/api-key-signup.html
+const USDA_API_KEY = process.env.USDA_API_KEY || 'DEMO_KEY';
 
 // Search for ingredients nutrition data
 router.get('/search', async (req, res) => {

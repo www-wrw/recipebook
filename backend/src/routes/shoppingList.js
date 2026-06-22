@@ -3,8 +3,10 @@ import { getDb } from '../db/init.js';
 
 const router = express.Router();
 
-// Generate shopping list based on recipes and pantry
-router.post('/generate', (req, res) => {
+// Generate shopping list based on recipes and pantry.
+// Matching note: this compares on normalized ingredient name + unit. It does
+// NOT yet convert between units (e.g. cups vs grams) — see roadmap.
+router.post('/generate', async (req, res) => {
   try {
     const { recipeIds } = req.body;
     if (!recipeIds || !Array.isArray(recipeIds) || recipeIds.length === 0) {
@@ -13,34 +15,32 @@ router.post('/generate', (req, res) => {
 
     const db = getDb();
 
-    // Get all ingredients from selected recipes
-    const placeholders = recipeIds.map(() => '?').join(',');
-    const recipeIngredients = db.prepare(`
-      SELECT ingredientName, SUM(quantity) as totalQuantity, unit
+    const placeholders = recipeIds.map((_, i) => `$${i + 1}`).join(',');
+    const recipeIngredients = await db.query(`
+      SELECT "ingredientName", SUM(quantity) as "totalQuantity", unit
       FROM recipe_ingredients
-      WHERE recipeId IN (${placeholders})
-      GROUP BY ingredientName, unit
-    `).all(...recipeIds);
+      WHERE "recipeId" IN (${placeholders})
+      GROUP BY "ingredientName", unit
+    `, recipeIds);
 
-    // Get pantry items
-    const pantryItems = db.prepare('SELECT name, quantity, unit FROM pantry').all();
+    const pantryResult = await db.query('SELECT name, quantity, unit FROM pantry');
     const pantryMap = new Map();
-    pantryItems.forEach(item => {
-      const key = `${item.name.toLowerCase()}:${item.unit}`;
-      pantryMap.set(key, item.quantity);
+    pantryResult.rows.forEach(item => {
+      pantryMap.set(`${item.name.trim().toLowerCase()}:${item.unit}`, item.quantity);
     });
 
-    // Calculate what's needed
-    const shoppingList = recipeIngredients.filter(ingredient => {
-      const key = `${ingredient.ingredientName.toLowerCase()}:${ingredient.unit}`;
-      const pantryQty = pantryMap.get(key) || 0;
-      return ingredient.totalQuantity > pantryQty;
-    }).map(ingredient => ({
-      name: ingredient.ingredientName,
-      quantity: ingredient.totalQuantity,
-      unit: ingredient.unit,
-      needed: ingredient.totalQuantity - (pantryMap.get(`${ingredient.ingredientName.toLowerCase()}:${ingredient.unit}`) || 0)
-    }));
+    const shoppingList = recipeIngredients.rows
+      .map(ingredient => {
+        const key = `${ingredient.ingredientName.trim().toLowerCase()}:${ingredient.unit}`;
+        const pantryQty = pantryMap.get(key) || 0;
+        return {
+          name: ingredient.ingredientName,
+          quantity: Number(ingredient.totalQuantity),
+          unit: ingredient.unit,
+          needed: Number(ingredient.totalQuantity) - pantryQty
+        };
+      })
+      .filter(item => item.needed > 0);
 
     res.json(shoppingList);
   } catch (error) {
