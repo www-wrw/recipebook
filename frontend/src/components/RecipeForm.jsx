@@ -197,7 +197,7 @@ export default function RecipeForm({ recipe, folders, onClose, onSaved }) {
               </>
             )}
           </button>
-          <input ref={scanInputRef} type="file" accept="image/*" capture="environment"
+          <input ref={scanInputRef} type="file" accept="image/*"
             className="hidden" onChange={handleScanPhoto}/>
         </div>
         <p className="text-xs text-gray-400 mb-5">Tap Scan Photo to auto-fill from a recipe image — AI extracts ingredients and detects diet tags.</p>
