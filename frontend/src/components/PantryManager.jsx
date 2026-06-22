@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../api';
 
 export default function PantryManager() {
   const [items, setItems] = useState([]);
@@ -18,7 +18,7 @@ export default function PantryManager() {
 
   const fetchPantryItems = async () => {
     try {
-      const response = await axios.get('/api/pantry');
+      const response = await api.get('/pantry');
       setItems(response.data);
     } catch (error) {
       console.error('Error fetching pantry:', error);
@@ -35,7 +35,7 @@ export default function PantryManager() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('/api/pantry', formData);
+      await api.post('/pantry', formData);
       setFormData({ name: '', quantity: 1, unit: 'cup', category: 'Other' });
       setShowForm(false);
       fetchPantryItems();
@@ -47,7 +47,7 @@ export default function PantryManager() {
 
   const deleteItem = async (id) => {
     try {
-      await axios.delete(`/api/pantry/${id}`);
+      await api.delete(`/pantry/${id}`);
       fetchPantryItems();
     } catch (error) {
       console.error('Error deleting item:', error);

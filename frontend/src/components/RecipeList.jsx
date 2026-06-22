@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../api';
 
 export default function RecipeList() {
   const [recipes, setRecipes] = useState([]);
@@ -11,7 +11,7 @@ export default function RecipeList() {
 
   const fetchRecipes = async () => {
     try {
-      const response = await axios.get('/api/recipes');
+      const response = await api.get('/recipes');
       setRecipes(response.data);
     } catch (error) {
       console.error('Error fetching recipes:', error);
@@ -23,7 +23,7 @@ export default function RecipeList() {
   const deleteRecipe = async (id) => {
     if (window.confirm('Delete this recipe?')) {
       try {
-        await axios.delete(`/api/recipes/${id}`);
+        await api.delete(`/recipes/${id}`);
         setRecipes(recipes.filter(r => r.id !== id));
       } catch (error) {
         console.error('Error deleting recipe:', error);

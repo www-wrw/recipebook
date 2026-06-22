@@ -1,82 +1,101 @@
-import Database from 'better-sqlite3';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import pg from 'pg';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DB_PATH = path.join(__dirname, '../../recipebook.db');
+const { Pool } = pg;
 
-let db = null;
+let pool = null;
 
 export function initDb() {
-  if (db) return db;
+  if (pool) return pool;
 
-  db = new Database(DB_PATH);
-  db.pragma('foreign_keys = ON');
+  const databaseUrl = process.env.DATABASE_URL;
 
-  // Create tables
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS recipes (
+  if (!databaseUrl) {
+    throw new Error('DATABASE_URL environment variable is required');
+  }
+
+  pool = new Pool({
+    connectionString: databaseUrl,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  });
+
+  createTables();
+  return pool;
+}
+
+async function createTables() {
+  const queries = [
+    `CREATE TABLE IF NOT EXISTS recipes (
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
       description TEXT,
-      imageUrl TEXT,
-      folderId TEXT,
+      "imageUrl" TEXT,
+      "folderId" TEXT,
       servings INTEGER DEFAULT 1,
-      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-      updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
+      "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      "updatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`,
 
-    CREATE TABLE IF NOT EXISTS recipe_ingredients (
+    `CREATE TABLE IF NOT EXISTS recipe_ingredients (
       id TEXT PRIMARY KEY,
-      recipeId TEXT NOT NULL,
-      ingredientName TEXT NOT NULL,
+      "recipeId" TEXT NOT NULL REFERENCES recipes(id) ON DELETE CASCADE,
+      "ingredientName" TEXT NOT NULL,
       quantity REAL NOT NULL,
       unit TEXT NOT NULL,
       calories REAL,
       protein REAL,
       carbs REAL,
       fat REAL,
-      fiber REAL,
-      FOREIGN KEY (recipeId) REFERENCES recipes(id) ON DELETE CASCADE
-    );
+      fiber REAL
+    )`,
 
-    CREATE TABLE IF NOT EXISTS pantry (
+    `CREATE TABLE IF NOT EXISTS pantry (
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
       quantity REAL NOT NULL,
       unit TEXT NOT NULL,
       category TEXT,
-      dateAdded DATETIME DEFAULT CURRENT_TIMESTAMP,
-      expiryDate DATETIME
-    );
+      "dateAdded" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      "expiryDate" TIMESTAMP
+    )`,
 
-    CREATE TABLE IF NOT EXISTS folders (
+    `CREATE TABLE IF NOT EXISTS folders (
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
       color TEXT,
-      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
+      "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`,
 
-    CREATE TABLE IF NOT EXISTS diet_preferences (
+    `CREATE TABLE IF NOT EXISTS diet_preferences (
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
       description TEXT
-    );
+    )`,
 
-    CREATE TABLE IF NOT EXISTS recipe_diet_tags (
-      recipeId TEXT NOT NULL,
-      dietPreferenceId TEXT NOT NULL,
-      PRIMARY KEY (recipeId, dietPreferenceId),
-      FOREIGN KEY (recipeId) REFERENCES recipes(id) ON DELETE CASCADE,
-      FOREIGN KEY (dietPreferenceId) REFERENCES diet_preferences(id)
-    );
+    `CREATE TABLE IF NOT EXISTS recipe_diet_tags (
+      "recipeId" TEXT NOT NULL REFERENCES recipes(id) ON DELETE CASCADE,
+      "dietPreferenceId" TEXT NOT NULL REFERENCES diet_preferences(id),
+      PRIMARY KEY ("recipeId", "dietPreferenceId")
+    )`,
 
-    CREATE INDEX IF NOT EXISTS idx_recipes_folder ON recipes(folderId);
-    CREATE INDEX IF NOT EXISTS idx_recipe_ingredients_recipe ON recipe_ingredients(recipeId);
-    CREATE INDEX IF NOT EXISTS idx_pantry_name ON pantry(name);
-  `);
+    `CREATE INDEX IF NOT EXISTS idx_recipes_folder ON recipes("folderId")`,
+    `CREATE INDEX IF NOT EXISTS idx_recipe_ingredients_recipe ON recipe_ingredients("recipeId")`,
+    `CREATE INDEX IF NOT EXISTS idx_pantry_name ON pantry(name)`
+  ];
 
-  // Insert default diet preferences
+  for (const query of queries) {
+    try {
+      await pool.query(query);
+    } catch (error) {
+      if (!error.message.includes('already exists')) {
+        console.error('Error creating table:', error);
+      }
+    }
+  }
+
+  await insertDefaultDiets();
+}
+
+async function insertDefaultDiets() {
   const diets = [
     { id: 'anti-inflammatory', name: 'Anti-inflammatory', description: 'Foods that reduce inflammation' },
     { id: 'high-fiber', name: 'High Fiber', description: 'Foods rich in fiber' },
@@ -88,19 +107,22 @@ export function initDb() {
     { id: 'gluten-free', name: 'Gluten-free', description: 'No gluten' }
   ];
 
-  const stmt = db.prepare(
-    `INSERT OR IGNORE INTO diet_preferences (id, name, description) VALUES (?, ?, ?)`
-  );
   for (const diet of diets) {
-    stmt.run(diet.id, diet.name, diet.description);
+    try {
+      await pool.query(
+        `INSERT INTO diet_preferences (id, name, description) VALUES ($1, $2, $3)
+         ON CONFLICT (id) DO NOTHING`,
+        [diet.id, diet.name, diet.description]
+      );
+    } catch (error) {
+      console.error('Error inserting diet:', error);
+    }
   }
-
-  return db;
 }
 
 export function getDb() {
-  if (!db) {
+  if (!pool) {
     initDb();
   }
-  return db;
+  return pool;
 }

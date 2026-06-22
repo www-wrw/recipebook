@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api';
 
 export default function ShoppingList() {
   const [recipes, setRecipes] = useState([]);
@@ -14,7 +14,7 @@ export default function ShoppingList() {
 
   const fetchRecipes = async () => {
     try {
-      const response = await axios.get('/api/recipes');
+      const response = await api.get('/recipes');
       setRecipes(response.data);
     } catch (error) {
       console.error('Error fetching recipes:', error);
@@ -38,7 +38,7 @@ export default function ShoppingList() {
     }
 
     try {
-      const response = await axios.post('/api/shopping-list/generate', {
+      const response = await api.post('/shopping-list/generate', {
         recipeIds: selectedRecipes
       });
       setShoppingList(response.data);

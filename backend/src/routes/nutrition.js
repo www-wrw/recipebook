@@ -38,7 +38,7 @@ router.get('/search', async (req, res) => {
 });
 
 // Calculate meal nutrition
-router.post('/calculate', async (req, res) => {
+router.post('/calculate', (req, res) => {
   try {
     const { ingredients } = req.body;
     if (!ingredients || !Array.isArray(ingredients)) {

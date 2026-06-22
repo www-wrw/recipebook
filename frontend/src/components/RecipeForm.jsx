@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../api';
 
 export default function RecipeForm({ onClose }) {
   const [formData, setFormData] = useState({
@@ -70,7 +70,7 @@ export default function RecipeForm({ onClose }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('/api/recipes', formData);
+      await api.post('/recipes', formData);
       onClose();
       window.location.reload();
     } catch (error) {
