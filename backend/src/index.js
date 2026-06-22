@@ -6,6 +6,7 @@ import pantryRoutes from './routes/pantry.js';
 import nutritionRoutes from './routes/nutrition.js';
 import shoppingListRoutes from './routes/shoppingList.js';
 import folderRoutes from './routes/folders.js';
+import aiRoutes from './routes/ai.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -23,6 +24,7 @@ app.use('/api/pantry', pantryRoutes);
 app.use('/api/nutrition', nutritionRoutes);
 app.use('/api/shopping-list', shoppingListRoutes);
 app.use('/api/folders', folderRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Initialize database, then start serving. We await schema creation so the
 // first request can't hit a table that doesn't exist yet.
