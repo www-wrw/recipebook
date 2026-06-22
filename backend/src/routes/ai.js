@@ -40,6 +40,7 @@ Return ONLY valid JSON (no markdown, no code fences):
   "name": "Recipe Name",
   "description": "One sentence description",
   "servings": 4,
+  "instructions": "1. Preheat oven to 350°F.\n2. Mix dry ingredients.\n3. Fold in wet ingredients.\n4. Bake 25 minutes.",
   "ingredients": [
     {
       "name": "rolled oats",

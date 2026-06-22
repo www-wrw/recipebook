@@ -78,6 +78,8 @@ async function createTables() {
       PRIMARY KEY ("recipeId", "dietPreferenceId")
     )`,
 
+    `ALTER TABLE recipes ADD COLUMN IF NOT EXISTS instructions TEXT`,
+
     `CREATE INDEX IF NOT EXISTS idx_recipes_folder ON recipes("folderId")`,
     `CREATE INDEX IF NOT EXISTS idx_recipe_ingredients_recipe ON recipe_ingredients("recipeId")`,
     `CREATE INDEX IF NOT EXISTS idx_pantry_name ON pantry(name)`

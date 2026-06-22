@@ -34,7 +34,7 @@ export default function RecipeDetail({ recipeId, onClose, onEdit }) {
     return () => { cancelled = true; };
   }, [recipeId]);
 
-  const nutrition = (recipe?.ingredients || []).reduce((acc, i) => {
+  const totals = (recipe?.ingredients || []).reduce((acc, i) => {
     const q = Number(i.quantity) || 0;
     acc.calories += (i.calories || 0) * q;
     acc.protein  += (i.protein  || 0) * q;
@@ -44,7 +44,16 @@ export default function RecipeDetail({ recipeId, onClose, onEdit }) {
     return acc;
   }, { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 });
 
-  const hasNutrition = nutrition.calories || nutrition.protein || nutrition.fiber;
+  const servings = Math.max(1, Number(recipe?.servings) || 1);
+  const nutrition = {
+    calories: totals.calories / servings,
+    protein:  totals.protein  / servings,
+    carbs:    totals.carbs    / servings,
+    fat:      totals.fat      / servings,
+    fiber:    totals.fiber    / servings,
+  };
+
+  const hasNutrition = totals.calories || totals.protein || totals.fiber;
 
   const runDietAnalysis = async () => {
     if (!recipe?.ingredients?.length) return;
@@ -103,20 +112,39 @@ export default function RecipeDetail({ recipeId, onClose, onEdit }) {
               ))}
             </ul>
 
+            {recipe.instructions && (
+              <>
+                <h3 className="font-semibold text-gray-900 mb-2">Directions</h3>
+                <ol className="space-y-2 mb-6">
+                  {recipe.instructions.split('\n').filter(s => s.trim()).map((step, i) => (
+                    <li key={i} className="text-sm text-gray-700 flex gap-3">
+                      <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-700 rounded-full text-xs flex items-center justify-center font-medium mt-0.5">
+                        {i + 1}
+                      </span>
+                      <span>{step.replace(/^\d+[\.\)]\s*/, '')}</span>
+                    </li>
+                  ))}
+                </ol>
+              </>
+            )}
+
             {hasNutrition && (
-              <div className="bg-gray-50 rounded-lg p-4 mb-6 grid grid-cols-5 gap-2 text-center">
-                {[
-                  ['Calories', Math.round(nutrition.calories)],
-                  ['Protein',  `${Math.round(nutrition.protein)}g`],
-                  ['Carbs',    `${Math.round(nutrition.carbs)}g`],
-                  ['Fat',      `${Math.round(nutrition.fat)}g`],
-                  ['Fiber',    `${Math.round(nutrition.fiber)}g`]
-                ].map(([label, val]) => (
-                  <div key={label}>
-                    <div className="text-lg font-semibold text-gray-900">{val}</div>
-                    <div className="text-xs text-gray-500">{label}</div>
-                  </div>
-                ))}
+              <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                <p className="text-xs text-gray-400 text-center mb-2">Per serving ({recipe.servings} servings total)</p>
+                <div className="grid grid-cols-5 gap-2 text-center">
+                  {[
+                    ['Calories', Math.round(nutrition.calories)],
+                    ['Protein',  `${Math.round(nutrition.protein)}g`],
+                    ['Carbs',    `${Math.round(nutrition.carbs)}g`],
+                    ['Fat',      `${Math.round(nutrition.fat)}g`],
+                    ['Fiber',    `${Math.round(nutrition.fiber)}g`]
+                  ].map(([label, val]) => (
+                    <div key={label}>
+                      <div className="text-lg font-semibold text-gray-900">{val}</div>
+                      <div className="text-xs text-gray-500">{label}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 

@@ -17,6 +17,7 @@ const UNITS = ['cup', 'tbsp', 'tsp', 'oz', 'lb', 'g', 'ml', 'piece'];
 const EMPTY = {
   name: '',
   description: '',
+  instructions: '',
   servings: 1,
   folderId: '',
   ingredients: [{ name: '', quantity: 1, unit: 'cup' }],
@@ -42,6 +43,7 @@ export default function RecipeForm({ recipe, folders, onClose, onSaved }) {
         setFormData({
           name: data.name || '',
           description: data.description || '',
+          instructions: data.instructions || '',
           servings: data.servings || 1,
           folderId: data.folderId || '',
           imageUrl: data.imageUrl || '',
@@ -95,6 +97,7 @@ export default function RecipeForm({ recipe, folders, onClose, onSaved }) {
           ...prev,
           name: data.name || prev.name,
           description: data.description || prev.description,
+          instructions: data.instructions || prev.instructions,
           servings: data.servings || prev.servings,
           imageUrl: reader.result,
           ingredients: data.ingredients?.length
@@ -217,7 +220,14 @@ export default function RecipeForm({ recipe, folders, onClose, onSaved }) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-            <textarea name="description" value={formData.description} onChange={handleInputChange} rows="3"
+            <textarea name="description" value={formData.description} onChange={handleInputChange} rows="2"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"/>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Directions</label>
+            <textarea name="instructions" value={formData.instructions} onChange={handleInputChange} rows="5"
+              placeholder="1. Preheat oven to 350°F.&#10;2. Mix dry ingredients...&#10;3. ..."
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"/>
           </div>
 
@@ -270,23 +280,27 @@ export default function RecipeForm({ recipe, folders, onClose, onSaved }) {
               <button type="button" onClick={addIngredient}
                 className="text-blue-600 hover:text-blue-700 text-sm font-medium">+ Add Ingredient</button>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {formData.ingredients.map((ing, index) => (
-                <div key={index} className="flex gap-2">
-                  <input type="text" placeholder="Ingredient name" value={ing.name}
-                    onChange={(e) => handleIngredientChange(index, 'name', e.target.value)}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"/>
-                  <input type="number" placeholder="Qty" value={ing.quantity} step="any"
-                    onChange={(e) => handleIngredientChange(index, 'quantity', e.target.value)}
-                    className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"/>
-                  <select value={ing.unit} onChange={(e) => handleIngredientChange(index, 'unit', e.target.value)}
-                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    {UNITS.map(u => <option key={u}>{u}</option>)}
-                  </select>
-                  {formData.ingredients.length > 1 && (
-                    <button type="button" onClick={() => removeIngredient(index)}
-                      className="text-red-600 hover:text-red-700 font-medium px-2">×</button>
-                  )}
+                <div key={index} className="space-y-1.5">
+                  <div className="flex gap-2">
+                    <input type="text" placeholder="Ingredient name" value={ing.name}
+                      onChange={(e) => handleIngredientChange(index, 'name', e.target.value)}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"/>
+                    {formData.ingredients.length > 1 && (
+                      <button type="button" onClick={() => removeIngredient(index)}
+                        className="text-red-400 hover:text-red-600 font-medium px-2 text-lg leading-none">×</button>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <input type="number" placeholder="Qty" value={ing.quantity} step="any"
+                      onChange={(e) => handleIngredientChange(index, 'quantity', e.target.value)}
+                      className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"/>
+                    <select value={ing.unit} onChange={(e) => handleIngredientChange(index, 'unit', e.target.value)}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                      {UNITS.map(u => <option key={u}>{u}</option>)}
+                    </select>
+                  </div>
                 </div>
               ))}
             </div>

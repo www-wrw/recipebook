@@ -47,14 +47,14 @@ router.get('/:id', async (req, res) => {
 // Create recipe
 router.post('/', async (req, res) => {
   try {
-    const { name, description, imageUrl, folderId, servings, ingredients, dietTags } = req.body;
+    const { name, description, instructions, imageUrl, folderId, servings, ingredients, dietTags } = req.body;
     const db = getDb();
     const recipeId = uuidv4();
 
     await db.query(
-      `INSERT INTO recipes (id, name, description, "imageUrl", "folderId", servings)
-       VALUES ($1, $2, $3, $4, $5, $6)`,
-      [recipeId, name, description, imageUrl || null, folderId || null, servings || 1]
+      `INSERT INTO recipes (id, name, description, instructions, "imageUrl", "folderId", servings)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [recipeId, name, description, instructions || null, imageUrl || null, folderId || null, servings || 1]
     );
 
     await replaceIngredients(db, recipeId, ingredients);
@@ -69,7 +69,7 @@ router.post('/', async (req, res) => {
 // Update recipe
 router.put('/:id', async (req, res) => {
   try {
-    const { name, description, imageUrl, folderId, servings, ingredients, dietTags } = req.body;
+    const { name, description, instructions, imageUrl, folderId, servings, ingredients, dietTags } = req.body;
     const db = getDb();
 
     const existing = await db.query('SELECT id FROM recipes WHERE id = $1', [req.params.id]);
@@ -77,9 +77,9 @@ router.put('/:id', async (req, res) => {
 
     await db.query(
       `UPDATE recipes
-       SET name = $1, description = $2, "imageUrl" = $3, "folderId" = $4, servings = $5, "updatedAt" = CURRENT_TIMESTAMP
-       WHERE id = $6`,
-      [name, description, imageUrl || null, folderId || null, servings || 1, req.params.id]
+       SET name = $1, description = $2, instructions = $3, "imageUrl" = $4, "folderId" = $5, servings = $6, "updatedAt" = CURRENT_TIMESTAMP
+       WHERE id = $7`,
+      [name, description, instructions || null, imageUrl || null, folderId || null, servings || 1, req.params.id]
     );
 
     await replaceIngredients(db, req.params.id, ingredients);
