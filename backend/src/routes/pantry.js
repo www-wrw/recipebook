@@ -34,6 +34,38 @@ router.post('/', async (req, res) => {
   }
 });
 
+// Bulk add pantry items (from photo scan or quick text entry)
+router.post('/bulk', async (req, res) => {
+  try {
+    const { items } = req.body;
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: 'items array required' });
+    }
+
+    const db = getDb();
+    const inserted = [];
+    const sql = `INSERT INTO pantry (id, name, quantity, unit, category, "expiryDate")
+                 VALUES ($1, $2, $3, $4, $5, $6)`;
+    for (const item of items) {
+      if (!item.name || !item.name.trim()) continue;
+      const id = uuidv4();
+      await db.query(sql, [
+        id,
+        item.name.trim(),
+        item.quantity || 1,
+        item.unit || 'piece',
+        item.category || 'Other',
+        item.expiryDate || null
+      ]);
+      inserted.push({ id, ...item });
+    }
+
+    res.status(201).json(inserted);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Update pantry item
 router.put('/:id', async (req, res) => {
   try {

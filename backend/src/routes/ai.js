@@ -99,6 +99,58 @@ If this is not a recipe image, return: {"error": "Not a recipe image"}`
   }
 });
 
+// POST /api/ai/scan-pantry
+// Accepts one image (`image`) or several (`images`) of groceries / a shelf /
+// a receipt and returns a list of pantry items to add.
+router.post('/scan-pantry', async (req, res) => {
+  try {
+    const { image, images, mediaType = 'image/jpeg' } = req.body;
+    const imageList = Array.isArray(images) && images.length ? images : (image ? [image] : []);
+    if (imageList.length === 0) return res.status(400).json({ error: 'image is required' });
+
+    const imageBlocks = imageList.map(img => toImageBlock(img, mediaType));
+
+    const client = getClient();
+    const message = await client.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 2048,
+      messages: [{
+        role: 'user',
+        content: [
+          ...imageBlocks,
+          {
+            type: 'text',
+            text: `Identify the food/grocery items in ${imageBlocks.length > 1 ? 'these images' : 'this image'} (a photo of groceries, a pantry shelf, a fridge, or a store receipt). List each distinct food item to stock in a pantry.
+
+Return ONLY valid JSON (no markdown, no code fences):
+{
+  "items": [
+    { "name": "black beans", "quantity": 2, "unit": "piece", "category": "Canned Goods" },
+    { "name": "olive oil", "quantity": 1, "unit": "ml", "category": "Oils" },
+    { "name": "spinach", "quantity": 1, "unit": "oz", "category": "Produce" }
+  ]
+}
+
+Valid units: cup, tbsp, tsp, oz, lb, g, ml, piece (use "piece" for countable items like cans, boxes, fruit)
+Categories: Produce, Dairy, Meat, Seafood, Grains, Canned Goods, Spices, Oils, Baking, Frozen, Snacks, Beverages, Other
+Skip non-food items. If quantity is unclear, use 1.
+If no food items are visible, return: {"items": []}`
+          }
+        ]
+      }]
+    });
+
+    const parsed = JSON.parse(stripJsonFences(message.content[0].text));
+    res.json(parsed);
+  } catch (err) {
+    console.error('AI scan-pantry error:', err.message);
+    if (err.message?.includes('ANTHROPIC_API_KEY')) {
+      return res.status(503).json({ error: 'AI not configured — set ANTHROPIC_API_KEY in environment.' });
+    }
+    res.status(500).json({ error: 'Failed to analyze image' });
+  }
+});
+
 // POST /api/ai/analyze-diet
 // Analyzes recipe ingredients: returns diet qualification breakdown + substitution suggestions.
 router.post('/analyze-diet', async (req, res) => {
