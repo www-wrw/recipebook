@@ -13,15 +13,25 @@ function stripJsonFences(text) {
   return text.trim().replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/i, '').trim();
 }
 
+// Normalize one image input (data URL or raw base64) into an Anthropic image block.
+function toImageBlock(image, fallbackMime = 'image/jpeg') {
+  const base64 = image.includes(',') ? image.split(',')[1] : image;
+  const mime = image.startsWith('data:') ? image.split(';')[0].slice(5) : fallbackMime;
+  return { type: 'image', source: { type: 'base64', media_type: mime, data: base64 } };
+}
+
 // POST /api/ai/scan-recipe
-// Accepts a base64 image, returns extracted recipe data + diet tags + estimated nutrition.
+// Accepts one image (`image`) or several (`images` array). Multiple photos of the
+// same recipe (e.g. ingredients page + directions page) are analyzed together
+// into a single recipe. Returns extracted recipe data + diet tags + nutrition.
 router.post('/scan-recipe', async (req, res) => {
   try {
-    const { image, mediaType = 'image/jpeg' } = req.body;
-    if (!image) return res.status(400).json({ error: 'image is required' });
+    const { image, images, mediaType = 'image/jpeg' } = req.body;
+    const imageList = Array.isArray(images) && images.length ? images : (image ? [image] : []);
+    if (imageList.length === 0) return res.status(400).json({ error: 'image is required' });
 
-    const base64 = image.includes(',') ? image.split(',')[1] : image;
-    const mime = image.startsWith('data:') ? image.split(';')[0].slice(5) : mediaType;
+    const imageBlocks = imageList.map(img => toImageBlock(img, mediaType));
+    const multi = imageBlocks.length > 1;
 
     const client = getClient();
     const message = await client.messages.create({
@@ -30,10 +40,12 @@ router.post('/scan-recipe', async (req, res) => {
       messages: [{
         role: 'user',
         content: [
-          { type: 'image', source: { type: 'base64', media_type: mime, data: base64 } },
+          ...imageBlocks,
           {
             type: 'text',
-            text: `Extract the recipe from this image. Estimate nutrition per 1 unit for each ingredient.
+            text: `${multi
+              ? `These ${imageBlocks.length} images are different parts of the SAME recipe (e.g. one page lists ingredients, another lists directions). Combine them into one recipe — merge all ingredients and all directions across every image. Do not create separate recipes.`
+              : 'Extract the recipe from this image.'} Estimate nutrition per 1 unit for each ingredient.
 
 Return ONLY valid JSON (no markdown, no code fences):
 {

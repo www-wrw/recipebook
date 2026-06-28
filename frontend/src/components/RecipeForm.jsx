@@ -81,48 +81,55 @@ export default function RecipeForm({ recipe, folders, onClose, onSaved }) {
     reader.readAsDataURL(file);
   };
 
+  const readAsDataUrl = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
   const handleScanPhoto = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
     setScanning(true);
     setScanNote('');
-    const reader = new FileReader();
-    reader.onloadend = async () => {
-      try {
-        const { data } = await api.post('/ai/scan-recipe', {
-          image: reader.result,
-          mediaType: file.type || 'image/jpeg'
-        });
-        setFormData(prev => ({
-          ...prev,
-          name: data.name || prev.name,
-          description: data.description || prev.description,
-          instructions: data.instructions || prev.instructions,
-          servings: data.servings || prev.servings,
-          imageUrl: reader.result,
-          ingredients: data.ingredients?.length
-            ? data.ingredients.map(i => ({
-                name: i.name,
-                quantity: i.quantity,
-                unit: UNITS.includes(i.unit) ? i.unit : 'piece',
-                calories: i.calories || null,
-                protein: i.protein || null,
-                carbs: i.carbs || null,
-                fat: i.fat || null,
-                fiber: i.fiber || null
-              }))
-            : prev.ingredients,
-          dietTags: data.dietTags?.length ? data.dietTags : prev.dietTags
-        }));
-        if (data.dietReasoning) setScanNote(data.dietReasoning);
-      } catch (err) {
-        setScanNote(err.response?.data?.error || 'Could not analyze photo.');
-        console.error('Scan error:', err);
-      } finally {
-        setScanning(false);
-      }
-    };
-    reader.readAsDataURL(file);
+    try {
+      const images = await Promise.all(files.map(readAsDataUrl));
+      const { data } = await api.post('/ai/scan-recipe', {
+        images,
+        mediaType: files[0].type || 'image/jpeg'
+      });
+      setFormData(prev => ({
+        ...prev,
+        name: data.name || prev.name,
+        description: data.description || prev.description,
+        instructions: data.instructions || prev.instructions,
+        servings: data.servings || prev.servings,
+        imageUrl: images[0],
+        ingredients: data.ingredients?.length
+          ? data.ingredients.map(i => ({
+              name: i.name,
+              quantity: i.quantity,
+              unit: UNITS.includes(i.unit) ? i.unit : 'piece',
+              calories: i.calories || null,
+              protein: i.protein || null,
+              carbs: i.carbs || null,
+              fat: i.fat || null,
+              fiber: i.fiber || null
+            }))
+          : prev.ingredients,
+        dietTags: data.dietTags?.length ? data.dietTags : prev.dietTags
+      }));
+      const prefix = files.length > 1 ? `Combined ${files.length} photos. ` : '';
+      setScanNote(`${prefix}${data.dietReasoning || ''}`.trim() || null);
+    } catch (err) {
+      setScanNote(err.response?.data?.error || 'Could not analyze photo(s).');
+      console.error('Scan error:', err);
+    } finally {
+      setScanning(false);
+      e.target.value = '';
+    }
   };
 
   const handleIngredientChange = (index, field, value) => {
@@ -200,10 +207,10 @@ export default function RecipeForm({ recipe, folders, onClose, onSaved }) {
               </>
             )}
           </button>
-          <input ref={scanInputRef} type="file" accept="image/*"
+          <input ref={scanInputRef} type="file" accept="image/*" multiple
             className="hidden" onChange={handleScanPhoto}/>
         </div>
-        <p className="text-xs text-gray-400 mb-5">Tap Scan Photo to auto-fill from a recipe image — AI extracts ingredients and detects diet tags.</p>
+        <p className="text-xs text-gray-400 mb-5">Tap Scan Photo to auto-fill from recipe images — select multiple photos (e.g. ingredients + directions pages) to combine them into one recipe.</p>
 
         {scanNote && (
           <div className="mb-4 p-3 bg-purple-50 border border-purple-200 rounded-lg text-sm text-purple-800">
