@@ -1,0 +1,37 @@
+name: Keep Supabase Alive
+
+# Supabase's free tier pauses a project after 7 days with no database activity.
+# This job hits the backend's /api/ping endpoint (which runs SELECT 1) on a
+# schedule so the database always sees a request well within that window.
+#
+# It runs from GitHub's servers, so it works even when the Render backend is
+# asleep — the request itself wakes Render and then touches the database.
+
+on:
+  schedule:
+    # Every 3 days at 12:00 UTC (cron clocks are UTC).
+    - cron: '0 12 */3 * *'
+  workflow_dispatch: {}   # allow manual runs from the Actions tab
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping backend (wakes Render, then queries the DB)
+        run: |
+          URL="https://recipebook-backend-b8ji.onrender.com/api/ping"
+          echo "Pinging $URL"
+          # Render free tier can cold-start slowly, so retry with a long timeout.
+          for attempt in 1 2 3 4 5; do
+            echo "Attempt $attempt..."
+            code=$(curl -s -o /tmp/body.txt -w "%{http_code}" --max-time 90 "$URL" || echo "000")
+            echo "HTTP $code"
+            cat /tmp/body.txt; echo
+            if [ "$code" = "200" ]; then
+              echo "Database pinged successfully."
+              exit 0
+            fi
+            sleep 30
+          done
+          echo "Ping failed after 5 attempts."
+          exit 1
