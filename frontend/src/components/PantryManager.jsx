@@ -1,9 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import api from '../api';
-
-const UNITS = ['cup', 'tbsp', 'tsp', 'oz', 'lb', 'g', 'ml', 'piece'];
-const CATEGORIES = ['Produce', 'Dairy', 'Meat', 'Seafood', 'Grains', 'Canned Goods',
-  'Spices', 'Oils', 'Baking', 'Frozen', 'Snacks', 'Beverages', 'Other'];
+import { UNITS, PANTRY_CATEGORIES as CATEGORIES } from '../constants';
 
 export default function PantryManager() {
   const [items, setItems] = useState([]);

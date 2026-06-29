@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import api from '../api';
+import { UNITS } from '../constants';
 
 const DIET_OPTIONS = [
   { id: 'anti-inflammatory', name: 'Anti-inflammatory' },
@@ -11,8 +12,6 @@ const DIET_OPTIONS = [
   { id: 'keto', name: 'Keto' },
   { id: 'gluten-free', name: 'Gluten-free' }
 ];
-
-const UNITS = ['cup', 'tbsp', 'tsp', 'oz', 'lb', 'g', 'ml', 'piece'];
 
 const EMPTY = {
   name: '',

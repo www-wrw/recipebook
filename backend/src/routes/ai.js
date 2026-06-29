@@ -69,7 +69,7 @@ Return ONLY valid JSON (no markdown, no code fences):
   "dietReasoning": "Vegetarian: no meat. High-fiber: oats provide ~8g fiber per cup."
 }
 
-Valid units: cup, tbsp, tsp, oz, lb, g, ml, piece
+Valid units (pick the one the recipe actually uses — prefer informal units like can/stick/clove when written that way): piece, can, stick, clove, slice, strip, pinch, dash, bunch, sprig, head, stalk, ear, package, jar, bottle, box, bag, handful, scoop, tsp, tbsp, cup, fl oz, pint, quart, gallon, ml, l, mg, g, kg, oz, lb
 Valid dietTags (only include tags the recipe genuinely meets):
 - anti-inflammatory: omega-3s, colorful veg, turmeric/ginger, minimal processed foods
 - high-fiber: 5g+ fiber per serving
@@ -131,7 +131,7 @@ Return ONLY valid JSON (no markdown, no code fences):
   ]
 }
 
-Valid units: cup, tbsp, tsp, oz, lb, g, ml, piece (use "piece" for countable items like cans, boxes, fruit)
+Valid units (prefer the natural one for the item, e.g. can of beans, stick of butter, head of lettuce): piece, can, stick, clove, slice, bunch, head, stalk, package, jar, bottle, box, bag, tsp, tbsp, cup, fl oz, pint, quart, gallon, ml, l, g, kg, oz, lb
 Categories: Produce, Dairy, Meat, Seafood, Grains, Canned Goods, Spices, Oils, Baking, Frozen, Snacks, Beverages, Other
 Skip non-food items. If quantity is unclear, use 1.
 If no food items are visible, return: {"items": []}`
