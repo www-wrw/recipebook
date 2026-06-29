@@ -33,7 +33,7 @@ export default function FolderBar({ folders, activeFolder, setActiveFolder, onCh
 
   const chip = (active) =>
     `px-3 py-1.5 rounded-full text-sm font-medium transition cursor-pointer ${
-      active ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+      active ? 'bg-cornflower text-cream' : 'bg-parchment text-ink/80 border border-edge hover:bg-cream'
     }`;
 
   return (
@@ -55,13 +55,13 @@ export default function FolderBar({ folders, activeFolder, setActiveFolder, onCh
       {adding ? (
         <form onSubmit={createFolder} className="flex items-center gap-2">
           <input autoFocus value={name} onChange={(e) => setName(e.target.value)} placeholder="Folder name"
-            className="px-3 py-1.5 border border-gray-300 rounded-full text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-          <button type="submit" className="text-blue-600 text-sm font-medium">Add</button>
-          <button type="button" onClick={() => { setAdding(false); setName(''); }} className="text-gray-400 text-sm">Cancel</button>
+            className="px-3 py-1.5 border border-edge bg-parchment rounded-full text-sm focus:ring-2 focus:ring-cornflower focus:border-transparent" />
+          <button type="submit" className="text-tomato text-sm font-medium">Add</button>
+          <button type="button" onClick={() => { setAdding(false); setName(''); }} className="text-ink/40 text-sm">Cancel</button>
         </form>
       ) : (
         <button onClick={() => setAdding(true)}
-          className="px-3 py-1.5 rounded-full text-sm font-medium text-blue-600 border border-dashed border-blue-300 hover:bg-blue-50">
+          className="px-3 py-1.5 rounded-full text-sm font-medium text-cornflower border border-dashed border-cornflower/50 hover:bg-cornflower/10">
           + New Folder
         </button>
       )}

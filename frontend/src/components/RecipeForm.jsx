@@ -178,14 +178,15 @@ export default function RecipeForm({ recipe, folders, onClose, onSaved }) {
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-start justify-center overflow-y-auto p-4 z-50">
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-xl p-6 my-8 w-full max-w-2xl">
+      <form onSubmit={handleSubmit} className="bg-parchment rounded-xl border border-edge shadow-xl p-6 my-8 w-full max-w-2xl">
+        <div className="gingham-red h-2 -mx-6 -mt-6 mb-4 rounded-t-xl" />
         <div className="flex justify-between items-center mb-1">
-          <h2 className="text-2xl font-bold">{isEdit ? 'Edit Recipe' : 'Add New Recipe'}</h2>
+          <h2 className="font-display text-2xl font-bold text-ink">{isEdit ? 'Edit Recipe' : 'Add New Recipe'}</h2>
           <button
             type="button"
             onClick={() => scanInputRef.current?.click()}
             disabled={scanning}
-            className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg transition text-sm font-medium"
+            className="flex items-center gap-2 bg-cornflower hover:bg-cornflower-dark disabled:opacity-50 text-cream px-4 py-2 rounded-lg transition text-sm font-medium"
           >
             {scanning ? (
               <>
@@ -209,44 +210,44 @@ export default function RecipeForm({ recipe, folders, onClose, onSaved }) {
           <input ref={scanInputRef} type="file" accept="image/*" multiple
             className="hidden" onChange={handleScanPhoto}/>
         </div>
-        <p className="text-xs text-gray-400 mb-5">Tap Scan Photo to auto-fill from recipe images — select multiple photos (e.g. ingredients + directions pages) to combine them into one recipe.</p>
+        <p className="text-xs text-ink/50 mb-5">Tap Scan Photo to auto-fill from recipe images — select multiple photos (e.g. ingredients + directions pages) to combine them into one recipe.</p>
 
         {scanNote && (
-          <div className="mb-4 p-3 bg-purple-50 border border-purple-200 rounded-lg text-sm text-purple-800">
+          <div className="mb-4 p-3 bg-cornflower/10 border border-cornflower/30 rounded-lg text-sm text-cornflower-dark">
             <span className="font-semibold">AI: </span>{scanNote}
           </div>
         )}
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Recipe Name *</label>
+            <label className="block text-sm font-medium text-ink/80 mb-1">Recipe Name *</label>
             <input type="text" name="name" value={formData.name} onChange={handleInputChange} required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"/>
+              className="w-full px-4 py-2 border border-edge bg-cream/30 rounded-lg focus:ring-2 focus:ring-tomato focus:border-transparent"/>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <label className="block text-sm font-medium text-ink/80 mb-1">Description</label>
             <textarea name="description" value={formData.description} onChange={handleInputChange} rows="2"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"/>
+              className="w-full px-4 py-2 border border-edge bg-cream/30 rounded-lg focus:ring-2 focus:ring-tomato focus:border-transparent"/>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Directions</label>
+            <label className="block text-sm font-medium text-ink/80 mb-1">Directions</label>
             <textarea name="instructions" value={formData.instructions} onChange={handleInputChange} rows="5"
               placeholder="1. Preheat oven to 350°F.&#10;2. Mix dry ingredients...&#10;3. ..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"/>
+              className="w-full px-4 py-2 border border-edge bg-cream/30 rounded-lg focus:ring-2 focus:ring-tomato focus:border-transparent"/>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Servings</label>
+              <label className="block text-sm font-medium text-ink/80 mb-1">Servings</label>
               <input type="number" name="servings" value={formData.servings} onChange={handleInputChange} min="1"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"/>
+                className="w-full px-4 py-2 border border-edge bg-cream/30 rounded-lg focus:ring-2 focus:ring-tomato focus:border-transparent"/>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Folder</label>
+              <label className="block text-sm font-medium text-ink/80 mb-1">Folder</label>
               <select name="folderId" value={formData.folderId} onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                className="w-full px-4 py-2 border border-edge bg-cream/30 rounded-lg focus:ring-2 focus:ring-tomato focus:border-transparent">
                 <option value="">No folder</option>
                 {folders.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
               </select>
@@ -254,27 +255,27 @@ export default function RecipeForm({ recipe, folders, onClose, onSaved }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Recipe Image</label>
+            <label className="block text-sm font-medium text-ink/80 mb-1">Recipe Image</label>
             <input type="file" accept="image/*" onChange={handleImageUpload}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg"/>
+              className="w-full px-4 py-2 border border-edge bg-cream/30 rounded-lg text-sm"/>
             {formData.imageUrl && (
-              <img src={formData.imageUrl} alt="preview" className="mt-2 h-32 object-cover rounded-md"/>
+              <img src={formData.imageUrl} alt="preview" className="mt-2 h-32 object-cover rounded-md border border-edge"/>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-ink/80 mb-2">
               Diet Tags
               {formData.dietTags.length > 0 && (
-                <span className="ml-2 text-xs text-purple-600 font-normal">auto-detected — review and adjust</span>
+                <span className="ml-2 text-xs text-cornflower font-normal">auto-detected — review and adjust</span>
               )}
             </label>
             <div className="grid grid-cols-2 gap-2">
               {DIET_OPTIONS.map(diet => (
                 <label key={diet.id} className="flex items-center">
                   <input type="checkbox" checked={formData.dietTags.includes(diet.id)}
-                    onChange={() => toggleDiet(diet.id)} className="rounded border-gray-300 text-blue-600"/>
-                  <span className="ml-2 text-sm text-gray-700">{diet.name}</span>
+                    onChange={() => toggleDiet(diet.id)} className="rounded border-edge text-tomato focus:ring-tomato"/>
+                  <span className="ml-2 text-sm text-ink/80">{diet.name}</span>
                 </label>
               ))}
             </div>
@@ -282,9 +283,9 @@ export default function RecipeForm({ recipe, folders, onClose, onSaved }) {
 
           <div>
             <div className="flex justify-between items-center mb-2">
-              <label className="block text-sm font-medium text-gray-700">Ingredients *</label>
+              <label className="block text-sm font-medium text-ink/80">Ingredients *</label>
               <button type="button" onClick={addIngredient}
-                className="text-blue-600 hover:text-blue-700 text-sm font-medium">+ Add Ingredient</button>
+                className="text-tomato hover:text-tomato-dark text-sm font-medium">+ Add Ingredient</button>
             </div>
             <div className="space-y-3">
               {formData.ingredients.map((ing, index) => (
@@ -292,7 +293,7 @@ export default function RecipeForm({ recipe, folders, onClose, onSaved }) {
                   <div className="flex gap-2">
                     <input type="text" placeholder="Ingredient name" value={ing.name}
                       onChange={(e) => handleIngredientChange(index, 'name', e.target.value)}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"/>
+                      className="flex-1 px-3 py-2 border border-edge bg-cream/30 rounded-lg focus:ring-2 focus:ring-tomato focus:border-transparent text-sm"/>
                     {formData.ingredients.length > 1 && (
                       <button type="button" onClick={() => removeIngredient(index)}
                         className="text-red-400 hover:text-red-600 font-medium px-2 text-lg leading-none">×</button>
@@ -301,9 +302,9 @@ export default function RecipeForm({ recipe, folders, onClose, onSaved }) {
                   <div className="flex gap-2">
                     <input type="number" placeholder="Qty" value={ing.quantity} step="any"
                       onChange={(e) => handleIngredientChange(index, 'quantity', e.target.value)}
-                      className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"/>
+                      className="w-24 px-3 py-2 border border-edge bg-cream/30 rounded-lg focus:ring-2 focus:ring-tomato focus:border-transparent text-sm"/>
                     <select value={ing.unit} onChange={(e) => handleIngredientChange(index, 'unit', e.target.value)}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                      className="flex-1 px-3 py-2 border border-edge bg-cream/30 rounded-lg focus:ring-2 focus:ring-tomato focus:border-transparent text-sm">
                       {UNITS.map(u => <option key={u}>{u}</option>)}
                     </select>
                   </div>
@@ -314,11 +315,11 @@ export default function RecipeForm({ recipe, folders, onClose, onSaved }) {
 
           <div className="flex gap-3 pt-4">
             <button type="submit" disabled={saving}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-6 py-2 rounded-lg transition font-medium">
+              className="flex-1 bg-tomato hover:bg-tomato-dark disabled:opacity-50 text-cream px-6 py-2 rounded-lg transition font-medium shadow-card">
               {saving ? 'Saving...' : (isEdit ? 'Save Changes' : 'Create Recipe')}
             </button>
             <button type="button" onClick={onClose}
-              className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-900 px-6 py-2 rounded-lg transition font-medium">
+              className="flex-1 bg-cream border border-edge hover:bg-edge/50 text-ink px-6 py-2 rounded-lg transition font-medium">
               Cancel
             </button>
           </div>

@@ -43,12 +43,12 @@ function App() {
     : recipes.filter(r => r.folderId === activeFolder);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-cream">
       <Navbar currentView={currentView} setCurrentView={setCurrentView} />
 
       <main className="container mx-auto px-4 py-8">
         {error && (
-          <div className="mb-4 p-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg text-sm">
+          <div className="mb-4 p-4 bg-mustard/10 border border-mustard/40 text-ink rounded-lg text-sm">
             {error}
           </div>
         )}
@@ -56,12 +56,12 @@ function App() {
         {currentView === 'recipes' && (
           <div>
             <div className="flex justify-between items-center mb-6">
-              <h1 className="text-3xl font-bold text-gray-900">Recipes</h1>
+              <h1 className="font-display text-4xl font-extrabold text-ink">Recipes</h1>
               <button
                 onClick={() => setFormState({ recipe: null })}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition"
+                className="bg-tomato hover:bg-tomato-dark text-cream px-6 py-2 rounded-lg transition font-medium shadow-card"
               >
-                Add Recipe
+                + Add Recipe
               </button>
             </div>
 
@@ -73,7 +73,7 @@ function App() {
             />
 
             {loading ? (
-              <div className="text-center py-12 text-gray-500">Loading recipes...</div>
+              <div className="text-center py-12 text-ink/50 font-hand text-xl">Warming the oven…</div>
             ) : (
               <RecipeList
                 recipes={visibleRecipes}

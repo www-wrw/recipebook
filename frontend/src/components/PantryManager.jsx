@@ -130,15 +130,15 @@ export default function PantryManager() {
     }
   };
 
-  if (loading) return <div className="text-center py-8">Loading pantry...</div>;
+  if (loading) return <div className="text-center py-8 text-ink/50 font-hand text-xl">Loading pantry…</div>;
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Pantry</h1>
+        <h1 className="font-display text-4xl font-extrabold text-ink">Pantry</h1>
         <div className="flex gap-2">
           <button onClick={() => scanInputRef.current?.click()} disabled={scanning}
-            className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg transition text-sm font-medium">
+            className="flex items-center gap-2 bg-cornflower hover:bg-cornflower-dark disabled:opacity-50 text-cream px-4 py-2 rounded-lg transition text-sm font-medium">
             {scanning ? (
               <>
                 <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
@@ -160,115 +160,115 @@ export default function PantryManager() {
           </button>
           <input ref={scanInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleScan}/>
           <button onClick={() => setShowForm(!showForm)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition text-sm font-medium">
+            className="bg-tomato hover:bg-tomato-dark text-cream px-4 py-2 rounded-lg transition text-sm font-medium shadow-card">
             {showForm ? 'Cancel' : 'Add Item'}
           </button>
         </div>
       </div>
 
       {scanError && (
-        <div className="mb-4 p-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg text-sm">{scanError}</div>
+        <div className="mb-4 p-3 bg-mustard/10 border border-mustard/40 text-ink rounded-lg text-sm">{scanError}</div>
       )}
 
       {/* Quick text add */}
       <form onSubmit={handleQuickAdd} className="mb-6 flex gap-2">
         <input type="text" value={quickText} onChange={(e) => setQuickText(e.target.value)}
           placeholder="Quick add — type items separated by commas (eggs, milk, rice...)"
-          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"/>
-        <button type="submit" className="bg-gray-800 hover:bg-gray-900 text-white px-5 py-2 rounded-lg transition text-sm font-medium">Add</button>
+          className="flex-1 px-4 py-2 border border-edge bg-parchment rounded-lg focus:ring-2 focus:ring-tomato focus:border-transparent text-sm"/>
+        <button type="submit" className="bg-sage hover:bg-sage-dark text-cream px-5 py-2 rounded-lg transition text-sm font-medium">Add</button>
       </form>
 
       {/* Scan review panel */}
       {reviewItems && (
-        <div className="mb-6 bg-purple-50 border border-purple-200 rounded-lg p-4">
+        <div className="mb-6 bg-cornflower/10 border border-cornflower/30 rounded-lg p-4">
           <div className="flex justify-between items-center mb-3">
-            <h3 className="font-semibold text-purple-900">Review detected items ({reviewItems.length})</h3>
-            <button onClick={() => setReviewItems(null)} className="text-purple-400 hover:text-purple-700 text-xl leading-none">×</button>
+            <h3 className="font-display font-bold text-cornflower-dark">Review detected items ({reviewItems.length})</h3>
+            <button onClick={() => setReviewItems(null)} className="text-cornflower/60 hover:text-cornflower-dark text-xl leading-none">×</button>
           </div>
           <div className="space-y-2 mb-4">
             {reviewItems.map((it, index) => (
-              <div key={index} className="flex gap-2 items-center bg-white rounded-lg p-2">
+              <div key={index} className="flex gap-2 items-center bg-parchment rounded-lg p-2 border border-edge">
                 <input value={it.name} onChange={(e) => updateReviewItem(index, 'name', e.target.value)}
-                  className="flex-1 px-2 py-1 border border-gray-200 rounded text-sm"/>
+                  className="flex-1 px-2 py-1 border border-edge bg-cream/30 rounded text-sm"/>
                 <input type="number" value={it.quantity} step="any" onChange={(e) => updateReviewItem(index, 'quantity', e.target.value)}
-                  className="w-16 px-2 py-1 border border-gray-200 rounded text-sm"/>
+                  className="w-16 px-2 py-1 border border-edge bg-cream/30 rounded text-sm"/>
                 <select value={it.unit} onChange={(e) => updateReviewItem(index, 'unit', e.target.value)}
-                  className="px-1 py-1 border border-gray-200 rounded text-sm">
+                  className="px-1 py-1 border border-edge bg-cream/30 rounded text-sm">
                   {UNITS.map(u => <option key={u}>{u}</option>)}
                 </select>
                 <select value={it.category} onChange={(e) => updateReviewItem(index, 'category', e.target.value)}
-                  className="px-1 py-1 border border-gray-200 rounded text-sm hidden sm:block">
+                  className="px-1 py-1 border border-edge bg-cream/30 rounded text-sm hidden sm:block">
                   {CATEGORIES.map(c => <option key={c}>{c}</option>)}
                 </select>
-                <button onClick={() => removeReviewItem(index)} className="text-red-400 hover:text-red-600 px-1 text-lg leading-none">×</button>
+                <button onClick={() => removeReviewItem(index)} className="text-ink/30 hover:text-tomato px-1 text-lg leading-none">×</button>
               </div>
             ))}
           </div>
           <div className="flex gap-2">
             <button onClick={confirmReview}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-lg transition text-sm font-medium">
+              className="bg-cornflower hover:bg-cornflower-dark text-cream px-5 py-2 rounded-lg transition text-sm font-medium">
               Add {reviewItems.length} {reviewItems.length === 1 ? 'item' : 'items'}
             </button>
             <button onClick={() => setReviewItems(null)}
-              className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-5 py-2 rounded-lg transition text-sm font-medium">Cancel</button>
+              className="bg-cream border border-edge hover:bg-edge/50 text-ink px-5 py-2 rounded-lg transition text-sm font-medium">Cancel</button>
           </div>
         </div>
       )}
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6 mb-6">
+        <form onSubmit={handleSubmit} className="bg-parchment rounded-xl border border-edge shadow-card p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Item Name *</label>
+              <label className="block text-sm font-medium text-ink/80 mb-1">Item Name *</label>
               <input type="text" name="name" value={formData.name} onChange={handleInputChange} required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"/>
+                className="w-full px-4 py-2 border border-edge bg-cream/30 rounded-lg focus:ring-2 focus:ring-tomato focus:border-transparent"/>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+              <label className="block text-sm font-medium text-ink/80 mb-1">Quantity</label>
               <input type="number" name="quantity" value={formData.quantity} onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"/>
+                className="w-full px-4 py-2 border border-edge bg-cream/30 rounded-lg focus:ring-2 focus:ring-tomato focus:border-transparent"/>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Unit</label>
+              <label className="block text-sm font-medium text-ink/80 mb-1">Unit</label>
               <select name="unit" value={formData.unit} onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                className="w-full px-4 py-2 border border-edge bg-cream/30 rounded-lg focus:ring-2 focus:ring-tomato focus:border-transparent">
                 {UNITS.map(u => <option key={u}>{u}</option>)}
               </select>
             </div>
             <div className="flex items-end">
               <button type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition">Add</button>
+                className="w-full bg-tomato hover:bg-tomato-dark text-cream px-4 py-2 rounded-lg transition">Add</button>
             </div>
           </div>
         </form>
       )}
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-parchment rounded-xl border border-edge shadow-card overflow-hidden">
         <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-200">
+          <thead className="bg-cream border-b border-edge">
             <tr>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Item</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Quantity</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Unit</th>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Category</th>
-              <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">Actions</th>
+              <th className="px-6 py-3 text-left text-sm font-display font-bold text-ink">Item</th>
+              <th className="px-6 py-3 text-left text-sm font-display font-bold text-ink">Quantity</th>
+              <th className="px-6 py-3 text-left text-sm font-display font-bold text-ink">Unit</th>
+              <th className="px-6 py-3 text-left text-sm font-display font-bold text-ink">Category</th>
+              <th className="px-6 py-3 text-right text-sm font-display font-bold text-ink">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody className="divide-y divide-edge/60">
             {items.length === 0 ? (
               <tr>
-                <td colSpan="5" className="px-6 py-8 text-center text-gray-500">No items in pantry</td>
+                <td colSpan="5" className="px-6 py-8 text-center text-ink/50 font-hand text-lg">The cupboard is bare</td>
               </tr>
             ) : (
               items.map(item => (
-                <tr key={item.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900">{item.name}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{item.quantity}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{item.unit}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{item.category}</td>
+                <tr key={item.id} className="hover:bg-cream/60">
+                  <td className="px-6 py-4 text-sm font-medium text-ink">{item.name}</td>
+                  <td className="px-6 py-4 text-sm text-ink/70">{item.quantity}</td>
+                  <td className="px-6 py-4 text-sm text-ink/70">{item.unit}</td>
+                  <td className="px-6 py-4 text-sm text-ink/70">{item.category}</td>
                   <td className="px-6 py-4 text-right">
                     <button onClick={() => deleteItem(item.id)}
-                      className="text-red-600 hover:text-red-700 text-sm font-medium">Delete</button>
+                      className="text-ink/40 hover:text-tomato text-sm font-medium">Delete</button>
                   </td>
                 </tr>
               ))

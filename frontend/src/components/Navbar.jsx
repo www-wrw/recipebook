@@ -1,9 +1,9 @@
 import { useState } from 'react';
 
 const NAV_ITEMS = [
-  { id: 'recipes',  label: 'Recipes' },
-  { id: 'pantry',   label: 'Pantry' },
-  { id: 'shopping', label: 'Shopping List' }
+  { id: 'recipes',  label: 'Recipes',       icon: '🍓' },
+  { id: 'pantry',   label: 'Pantry',        icon: '🥫' },
+  { id: 'shopping', label: 'Shopping List', icon: '🧺' }
 ];
 
 export default function Navbar({ currentView, setCurrentView }) {
@@ -15,15 +15,21 @@ export default function Navbar({ currentView, setCurrentView }) {
   };
 
   return (
-    <nav className="bg-white shadow-sm border-b border-gray-200 relative z-40">
+    <nav className="bg-parchment border-b border-edge relative z-40">
+      {/* gingham picnic-cloth strip along the very top */}
+      <div className="gingham-blue h-2.5 w-full" />
+
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-14">
-          <h1 className="text-xl font-bold text-blue-600">RecipeBook</h1>
+        <div className="flex items-center justify-between h-16">
+          <div className="flex items-baseline gap-2">
+            <h1 className="font-display text-2xl font-extrabold tracking-wide text-tomato">RecipeBook</h1>
+            <span className="hidden sm:inline font-hand text-lg text-sage">est. in the kitchen</span>
+          </div>
 
           <button
             onClick={() => setOpen(o => !o)}
             aria-label="Menu"
-            className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition"
+            className="p-2 rounded-lg text-ink/70 hover:bg-cream hover:text-tomato transition"
           >
             {open ? (
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -41,17 +47,18 @@ export default function Navbar({ currentView, setCurrentView }) {
       {open && (
         <>
           <div className="fixed inset-0 z-30" onClick={() => setOpen(false)}/>
-          <div className="absolute right-4 top-14 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-40">
+          <div className="absolute right-4 top-[4.5rem] w-52 bg-parchment rounded-lg shadow-card border border-edge py-1.5 z-40">
             {NAV_ITEMS.map(item => (
               <button
                 key={item.id}
                 onClick={() => navigate(item.id)}
-                className={`w-full text-left px-4 py-2.5 text-sm font-medium transition ${
+                className={`w-full text-left px-4 py-2.5 text-sm font-medium transition flex items-center gap-2.5 ${
                   currentView === item.id
-                    ? 'bg-blue-50 text-blue-700'
-                    : 'text-gray-700 hover:bg-gray-50'
+                    ? 'bg-tomato/10 text-tomato'
+                    : 'text-ink/80 hover:bg-cream'
                 }`}
               >
+                <span className="text-base">{item.icon}</span>
                 {item.label}
               </button>
             ))}
