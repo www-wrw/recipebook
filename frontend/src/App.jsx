@@ -56,7 +56,7 @@ function App() {
         {currentView === 'recipes' && (
           <div>
             <div className="flex justify-between items-center mb-6">
-              <h1 className="font-display text-4xl font-extrabold text-ink">Recipes</h1>
+              <h1 className="font-display text-4xl font-bold text-ink">Recipes</h1>
               <button
                 onClick={() => setFormState({ recipe: null })}
                 className="bg-tomato hover:bg-tomato-dark text-cream px-6 py-2 rounded-lg transition font-medium shadow-card"

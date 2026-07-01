@@ -55,7 +55,7 @@ export default function ShoppingList() {
 
   return (
     <div>
-      <h1 className="font-display text-4xl font-extrabold text-ink mb-6">Shopping List</h1>
+      <h1 className="font-display text-4xl font-bold text-ink mb-6">Shopping List</h1>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recipe Selection */}
         <div className="lg:col-span-1">

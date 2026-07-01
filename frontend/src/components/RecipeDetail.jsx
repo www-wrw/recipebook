@@ -83,7 +83,7 @@ export default function RecipeDetail({ recipeId, onClose, onEdit }) {
         ) : (
           <>
             <div className="flex justify-between items-start mb-4">
-              <h2 className="font-display text-3xl font-extrabold text-ink">{recipe.name}</h2>
+              <h2 className="font-display text-3xl font-bold text-ink">{recipe.name}</h2>
               <button onClick={onClose} className="text-ink/40 hover:text-tomato text-2xl leading-none">×</button>
             </div>
 

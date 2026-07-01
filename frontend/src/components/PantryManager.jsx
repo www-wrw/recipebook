@@ -135,7 +135,7 @@ export default function PantryManager() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="font-display text-4xl font-extrabold text-ink">Pantry</h1>
+        <h1 className="font-display text-4xl font-bold text-ink">Pantry</h1>
         <div className="flex gap-2">
           <button onClick={() => scanInputRef.current?.click()} disabled={scanning}
             className="flex items-center gap-2 bg-cornflower hover:bg-cornflower-dark disabled:opacity-50 text-cream px-4 py-2 rounded-lg transition text-sm font-medium">

@@ -22,7 +22,7 @@ export default function Navbar({ currentView, setCurrentView }) {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-baseline gap-2">
-            <h1 className="font-display text-2xl font-extrabold tracking-wide text-tomato">RecipeBook</h1>
+            <h1 className="font-display text-2xl font-bold tracking-wide text-tomato">RecipeBook</h1>
             <span className="hidden sm:inline font-hand text-lg text-sage">est. in the kitchen</span>
           </div>
 

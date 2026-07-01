@@ -18,7 +18,7 @@ export default {
         edge: '#E7D9BE'
       },
       fontFamily: {
-        display: ['"Playfair Display"', 'Georgia', 'serif'],
+        display: ['"Libre Caslon Text"', 'Georgia', 'serif'],
         body: ['Lora', 'Georgia', 'serif'],
         hand: ['Caveat', 'cursive']
       },
